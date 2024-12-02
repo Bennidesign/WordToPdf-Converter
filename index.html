@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word zu PDF Konverter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+    }
+    #status {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Word zu PDF Konverter</h1>
+  <button id="selectFile">Word-Datei auswählen</button>
+  <button id="convertBtn" disabled>Konvertieren</button>
+  <p id="status">Status: Warten auf Eingabe...</p>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    const { dialog } = require('electron').remote;
+
+    const selectFileBtn = document.getElementById('selectFile');
+    const convertBtn = document.getElementById('convertBtn');
+    const statusLabel = document.getElementById('status');
+
+    let selectedFilePath = '';
+
+    selectFileBtn.addEventListener('click', async () => {
+      const result = await dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{ name: 'Word Dokumente', extensions: ['doc', 'docx'] }]
+      });
+
+      if (!result.canceled && result.filePaths.length > 0) {
+        selectedFilePath = result.filePaths[0];
+        convertBtn.disabled = false;
+        statusLabel.textContent = `Ausgewählte Datei: ${selectedFilePath}`;
+      }
+    });
+
+    convertBtn.addEventListener('click', async () => {
+      if (selectedFilePath) {
+        statusLabel.textContent = 'Konvertierung läuft...';
+        const pdfPath = await ipcRenderer.invoke('convert-to-pdf', selectedFilePath);
+        if (pdfPath) {
+          statusLabel.textContent = `Konvertierung abgeschlossen: ${pdfPath}`;
+        } else {
+          statusLabel.textContent = 'Fehler bei der Konvertierung!';
+        }
+      }
+    });
+  </script>
+</body>
+</html>
