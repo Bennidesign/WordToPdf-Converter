@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const edge = require('edge');
 
-// Funktion zum Erstellen des Fensters
 let win;
 function createWindow() {
   win = new BrowserWindow({
@@ -20,7 +19,6 @@ function createWindow() {
   });
 }
 
-// Initialisierung der Electron-Anwendung
 app.whenReady().then(() => {
   createWindow();
 
@@ -37,7 +35,6 @@ app.on('window-all-closed', () => {
   }
 });
 
-// Word zu PDF Konvertierungsfunktion (über COM-Interop)
 const convertToPdf = edge.func({
   source: function () {/*
     using System;
@@ -60,7 +57,6 @@ const convertToPdf = edge.func({
   */}
 });
 
-// Führe die Konvertierung durch
 ipcMain.handle('convert-to-pdf', async (event, filePath) => {
   try {
     const pdfPath = await convertToPdf(filePath);
